@@ -1,8 +1,34 @@
-# Cultural Evolution Framework Replication
+# Constraints that endure: Assessing model robustness in cultural evolution
 
 This repository contains a replication of the historical framework established by Baumard et al. (2022).
 
 Instead of splitting history into fixed, separate time blocks, this workflow models time as a continuous line across 17 historical regions using a Gaussian Process. This method smooths out gaps where data is scarce and allows for tracking of long-term cultural trends without artificial timeline cuts.
+
+## Repository structure
+
+```text
+├── data/
+│   └── Data_love_bywork_2019.xlsx                # source data
+├── output/
+│   ├─ figures/
+│   │  ├── eurasian_love_trajectories.png        # summary trends by era
+│   │  ├── model_comparison_chart.png            # comparison between frameworks
+│   │  └── replicated_trajectories.png           # Bayesian model trajectories
+│   └─ tables/
+│      ├── bayesian_posterior_summary.csv        # variance and model details
+│      ├── era_binned_comparison.csv             # results grouped into era blocks for comparison
+│      ├── etc_bayesian_latent_trajectories.csv  # continuous regional trend lines
+│      ├── etc_bayesian_metrics.csv              # main effect sizes and uncertainty ranges
+│      └── model_confirmation_table.md           # summary table for reports
+├── utils/
+│   ├── __init__.py                              # handles shortcut imports
+│   ├── compare_models.py                        # groups trends and calculates comparisons
+│   └── generate_plots.py                        # plot generator
+├── .gitignore
+├── README.md                                    # project documentation
+├── requirements.txt                             # pinned package dependencies
+└── run_model.py                                 # main script
+```
 
 ## Background & data sources
 
@@ -35,31 +61,6 @@ In the original study, the authors argued that specific socioeconomic changes dr
 
 Because the entire 95% Bayesian uncertainty interval (`HDI_2.5` to `HDI_97.5`) sits entirely above zero, the updated model confirms that this relationship remains highly significant. The finding is highly resilient: even when we strip away the original paper's arbitrary historical time blocks and account for smooth spatial and temporal variations across 17 distinct regions, the underlying historical trend holds true.
 
-## Repository structure
-
-```text
-constraints-endure-culture/
-├── data/
-│   └── Data_love_bywork_2019.xlsx                # Source data
-├── output/
-│   ├── figures/
-│   │   ├── eurasian_love_trajectories.png        # Summary trends by era
-│   │   ├── model_comparison_chart.png            # Comparison between frameworks
-│   │   └── replicated_trajectories.png           # Bayesian model trajectories
-│   └── tables/
-│       ├── bayesian_posterior_summary.csv        # Variance and model details
-│       ├── era_binned_comparison.csv             # Results grouped into era blocks for comparison
-│       ├── etc_bayesian_latent_trajectories.csv  # Continuous regional trend lines
-│       ├── etc_bayesian_metrics.csv              # Main effect sizes and uncertainty ranges
-│       └── model_confirmation_table.md           # Summary table for reports
-├── utils/
-│   ├── __init__.py                               # Handles shortcut imports
-│   ├── compare_models.py                         # Groups trends and calculates comparisons
-│   └── generate_plots.py                         # Plot generator
-├── README.md                                     # Project documentation
-└── run_model.py                                  # Runs the main Bayesian model
-```
-
 ## Data cleaning & transformations
 
 The main script `run_model.py` automatically cleans the spreadsheet data before fitting the model:
@@ -68,6 +69,14 @@ The main script `run_model.py` automatically cleans the spreadsheet data before 
 * **Trimming Lifespans:** Data entries that fall completely outside a culture's actual historical existence (such as Arab World data from before 500 AD or late modern Egyptian entries) are filtered out to keep early history clean.
 
 ## How to Run the Replication
+
+The core Bayesian model uses JAX-accelerated sampling. While they can run on a standard CPU, an NVIDIA GPU is highly recommended for faster sampling times.
+
+### Dependencies
+Install the required packages using the pinned project requirements file:
+```bash
+pip install -r requirements.txt
+```
 
 ### 1. Fit the Bayesian model
 Run the core statistical pipeline. This step cleans the data, runs the model sampler, and saves the trend data:
