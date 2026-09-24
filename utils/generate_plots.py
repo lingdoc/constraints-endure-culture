@@ -143,11 +143,11 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
         ax.axhline(0.0, color='#888888', linestyle='--', linewidth=1, alpha=0.5)
 
     boundaries = [-500, 200, 800, 1400, 1800]
-    
+
     orig_means = df['Original GLM Estimate'].values
     orig_ses = df['Original SE'].values
-    bayes_means = df['Your Bayesian Mean'].values
-    bayes_sds = df['Your Cross-Regional SD'].values
+    bayes_means = df['Bayesian Mean'].values
+    bayes_sds = df['Cross-Regional SD'].values
 
     step_orig = np.append(orig_means, orig_means[-1])
     step_bayes = np.append(bayes_means, bayes_means[-1])
