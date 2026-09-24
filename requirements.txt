@@ -1,0 +1,8 @@
+matplotlib==3.11.2
+numpy==2.5.3
+pandas==3.0.6
+pymc==5.25.1
+seaborn==0.13.2
+openpyxl>=3.1.0
+numpyro>=0.15.0
+jax[cuda]>=0.4.30
