@@ -15,6 +15,7 @@ Instead of splitting history into fixed, separate time blocks, this workflow mod
 │   │  ├── model_comparison_chart.png            # comparison between frameworks
 │   │  └── replicated_trajectories.png           # Bayesian model trajectories
 │   └─ tables/
+│      ├── culture_connectivity_summary.csv      # background spatial and thematic metrics
 │      ├── bayesian_posterior_summary.csv        # variance and model details
 │      ├── era_binned_comparison.csv             # results grouped into era blocks for comparison
 │      ├── etc_bayesian_latent_trajectories.csv  # continuous regional trend lines
@@ -25,6 +26,7 @@ Instead of splitting history into fixed, separate time blocks, this workflow mod
 │   ├── compare_models.py                        # groups trends and calculates comparisons
 │   └── generate_plots.py                        # plot generator
 ├── .gitignore
+├── calculate_connectivity.py                    # measure network density of datsets
 ├── README.md                                    # project documentation
 ├── requirements.txt                             # pinned package dependencies
 └── run_model.py                                 # main script
@@ -73,24 +75,30 @@ The main script `run_model.py` automatically cleans the spreadsheet data before 
 The core Bayesian model uses JAX-accelerated sampling. While they can run on a standard CPU, an NVIDIA GPU is highly recommended for faster sampling times.
 
 ### Dependencies
-Install the required packages using the pinned project requirements file:
+Install the required packages using the pinned project requirements file. This process downloads the [`pykdensity` package](https://github.com/lingdoc/pykdensity) to handle the auditing of data connectivity:
 ```bash
 pip install -r requirements.txt
 ```
 
-### 1. Fit the Bayesian model
+### 1. Audit dataset connectivity (Recommended)
+Run the diagnostic script to measure background spatial and thematic data clustering before fitting any models. This script targets your categorical spreadsheets, calculates density scores via the `pykdensity` package, and logs the spatial and structural evaluation metrics (κ) to the terminal:
+```bash
+python calculate_connectivity.py
+```
+
+### 2. Fit the Bayesian model
 Run the core statistical pipeline. This step cleans the data, runs the model sampler, and saves the trend data:
 ```bash
 python run_model.py
 ```
 
-### 2. Compare the frameworks
+### 3. Compare the frameworks
 Run this script to aggregate the continuous model trends into the original study's fixed blocks for a direct comparison:
 ```bash
 python utils/compare_models.py
 ```
 
-### 3. Generate charts
+### 4. Generate charts
 Generate the final figures, comparison plots, and summary charts:
 ```bash
 python utils/generate_plots.py
