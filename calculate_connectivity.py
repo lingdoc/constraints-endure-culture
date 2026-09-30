@@ -12,7 +12,6 @@ import numpy as np
 from pykdensity import calculate_densities
 
 # 0. project setup
-# folders to read/write data based on your directory layout
 data_dir = "data"
 output_csv = os.path.join("output", "tables", "culture_connectivity_summary.csv")
 os.makedirs(os.path.dirname(output_csv), exist_ok=True)
@@ -31,24 +30,42 @@ df_culture = pd.read_excel(data_path)
 sample_size = len(df_culture)
 print(f"Successfully loaded {sample_size} cultural trajectory records.")
 
+# isolate identifier column name dynamically
+id_column = 'Name' if 'Name' in df_culture.columns else df_culture.columns[0]
+
+# isolate valid thematic attributes present in dataset columns
+struct_list = [col for col in ['Century', 'Genre.1'] if col in df_culture.columns]
+
 # 2. run the matrix check using matching categories
-# the package prints individual data layer diagnostics automatically
+# mapped parameters exactly to your engine's 'spatial_cats' and 'struct_cats' setup
 k_spatial, k_structural = calculate_densities(
     data=df_culture,
-    id_col='Name' if 'Name' in df_culture.columns else df_culture.columns[0],
+    id_col=id_column,
     tree=None,                  # disabled: culture relies on text categories
-    tree_type='fixed',          # ignored since no tree file is supplied
-    coord_cols=['Zone'] if 'Zone' in df_culture.columns else None,              # groups by region names
-    theme_cols=['Century', 'Genre.1'] if 'Century' in df_culture.columns else None,  # groups by era and genre
+    tree_type='adaptive',       # uses adaptive categorical checking
+    coord_cols=None,            # space is checked via region tags instead of coordinates
+    spatial_cats='Zone' if 'Zone' in df_culture.columns else None,
+    struct_cats=struct_list if struct_list else None,
+    spatial_km=500.0,
+    struct_depth=8,
     verbose=True
 )
+
+# tag safety topology boundaries using the updated 0.10 rule
+if not pd.isna(k_structural) and k_structural <= 0.10:
+    tier_status = "sparse_topology"
+elif not pd.isna(k_structural) and k_structural <= 0.25:
+    tier_status = "moderate_topology"
+else:
+    tier_status = "dense_topology"
 
 # 3. compile results into a summary table
 compiled_results = [{
     "Dataset": "Data_love_bywork_2019",
     "Sample_Size_N": sample_size,
     "Spatial_Density": k_spatial if not pd.isna(k_spatial) else "N/A",
-    "Structural_Density": k_structural if not pd.isna(k_structural) else "N/A"
+    "Structural_Density": k_structural if not pd.isna(k_structural) else "N/A",
+    "Topology_Tier": tier_status
 }]
 
 print("\nConnectivity check complete")
@@ -58,6 +75,5 @@ df_out = pd.DataFrame(compiled_results)
 df_out.to_csv(output_csv, index=False)
 print(f"Summary file saved to: {output_csv}\n")
 
-# print the final table summary directly to your console
 print(df_out.to_string(index=False))
 print("-" * 80 + "\n")

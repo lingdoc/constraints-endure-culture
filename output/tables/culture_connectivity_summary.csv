@@ -1,2 +1,2 @@
-Dataset,Sample_Size_N,Spatial_Density,Structural_Density
-Data_love_bywork_2019,2936,0.14133635675791095,0.04214242279358861
+Dataset,Sample_Size_N,Spatial_Density,Structural_Density,Topology_Tier
+Data_love_bywork_2019,2936,0.14133635675791095,0.21793769641041827,moderate_topology
