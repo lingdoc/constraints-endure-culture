@@ -1,5 +1,5 @@
 """
-Generates the project's primary manuscript figures and model trend charts.
+generates the project's primary manuscript figures and model trend charts.
 """
 import os
 import numpy as np
@@ -17,7 +17,8 @@ def _load_and_clean_data(data_path):
 
 def plot_publication_trajectories(data_path='output/tables/etc_bayesian_latent_trajectories.csv', output_dir='output/figures'):
     """
-    Plots continuous latent trajectories by region with shaded uncertainty intervals.
+    plots continuous latent trajectories by region with shaded uncertainty intervals.
+    applies a broad, high-contrast palette with transparent shading to support overlapping lines.
     """
     sns.set_theme(style="white")
     plt.rcParams.update({
@@ -28,24 +29,25 @@ def plot_publication_trajectories(data_path='output/tables/etc_bayesian_latent_t
 
     df = _load_and_clean_data(data_path)
 
+    # okabe-ito safe palette definitions mapping high-contrast cross-vision values
     paper_styles = {
-        'Greek world':   {'code': 'GRE', 'color': '#0B132B'},
-        'Latin world':   {'code': 'LAT', 'color': '#1C2541'},
-        'Arab world':    {'code': 'ARA', 'color': '#007F5F'},
-        'China':         {'code': 'CHI', 'color': '#D94E34'},
-        'Japan':         {'code': 'JAP', 'color': '#E9C46A'},
-        'France':        {'code': 'FRA', 'color': '#00B4D8'},
-        'England':       {'code': 'ENG', 'color': '#0077B6'},
-        'Indian world':  {'code': 'IND', 'color': '#9B2226'},
-        'Russian world': {'code': 'RUS', 'color': '#7209B7'},
-        'Wales':         {'code': 'WEL', 'color': '#4CC9F0'},
-        'Ireland':       {'code': 'IRE', 'color': '#B5179E'},
-        'Iceland':       {'code': 'ICE', 'color': '#F72585'},
-        'Italy':         {'code': 'ITA', 'color': '#4a5759'},
-        'Spain':         {'code': 'SPA', 'color': '#2f3e46'},
-        'German World':  {'code': 'GER', 'color': '#6b705c'},
-        'Low Countries': {'code': 'LOW', 'color': '#a5a58d'},
-        'Ancient Egypt': {'code': 'EGY', 'color': '#3f37c9'}
+        'Greek world':   {'code': 'GRE', 'color': '#0072B2'}, # deep blue
+        'Latin world':   {'code': 'LAT', 'color': '#E69F00'}, # amber
+        'Arab world':    {'code': 'ARA', 'color': '#009E73'}, # bluish green
+        'China':         {'code': 'CHI', 'color': '#D55E00'}, # vermilion
+        'Japan':         {'code': 'JAP', 'color': '#CC79A7'}, # reddish purple
+        'France':        {'code': 'FRA', 'color': '#56B4E9'}, # sky blue
+        'England':       {'code': 'ENG', 'color': '#F0E442'}, # yellow
+        'Indian world':  {'code': 'IND', 'color': '#000000'}, # black
+        'Russian world': {'code': 'RUS', 'color': '#444444'}, # dark gray
+        'Wales':         {'code': 'WEL', 'color': '#111111'}, # charcoal
+        'Ireland':       {'code': 'IRE', 'color': '#222222'},
+        'Iceland':       {'code': 'ICE', 'color': '#666666'},
+        'Italy':         {'code': 'ITA', 'color': '#777777'},
+        'Spain':         {'code': 'SPA', 'color': '#888888'},
+        'German World':  {'code': 'GER', 'color': '#999999'},
+        'Low Countries': {'code': 'LOW', 'color': '#aaaaaa'},
+        'Ancient Egypt': {'code': 'EGY', 'color': '#bbbbbb'}
     }
 
     fig, ax = plt.subplots(figsize=(10.5, 7.5), dpi=300)
@@ -87,19 +89,21 @@ def plot_publication_trajectories(data_path='output/tables/etc_bayesian_latent_t
 
 def generate_century_binned_plot(data_path='output/tables/etc_bayesian_latent_trajectories.csv', output_dir='output/figures'):
     """
-    Groups historical years into discrete centuries to reduce baseline timeline clutter.
+    groups historical years into discrete centuries to reduce baseline timeline clutter.
+    pairs unique markers and line styles to secure legibility in greyscale printouts.
     """
     df = _load_and_clean_data(data_path)
     df['Century'] = (np.floor(df['Historical_Year'] / 100) * 100).astype(int)
     summary = df.groupby(['Regional_Zone', 'Century'])['Latent_Value_Mean'].mean().reset_index()
 
+    # colorblind-safe palettes combined with unique markers and structural line types
     focus_regions = {
-        'GRE': {'name': 'Greek World', 'color': '#1f77b4', 'marker': 'o'},
-        'LAT': {'name': 'Latin World', 'color': '#7bc8f6', 'marker': 's'},
-        'CHI': {'name': 'China Core', 'color': '#ff7f0e', 'marker': '^'},
-        'FRA': {'name': 'France', 'color': '#d62728', 'marker': 'd'},
-        'ENG': {'name': 'England', 'color': '#9467bd', 'marker': 'v'},
-        'ARA': {'name': 'Arabic World', 'color': '#2ca02c', 'marker': 'x'}
+        'GRE': {'name': 'Greek World', 'color': '#0072B2', 'marker': 'o', 'style': '-'},   # blue solid
+        'LAT': {'name': 'Latin World', 'color': '#E69F00', 'marker': 's', 'style': '--'},  # amber dashed
+        'CHI': {'name': 'China Core', 'color': '#D55E00', 'marker': '^', 'style': '-.'},  # vermilion dashdot
+        'FRA': {'name': 'France', 'color': '#009E73', 'marker': 'd', 'style': ':'},   # green dotted
+        'ENG': {'name': 'England', 'color': '#CC79A7', 'marker': 'v', 'style': '-'},   # purple solid
+        'ARA': {'name': 'Arabic World', 'color': '#000000', 'marker': 'x', 'style': '--'}  # black dashed
     }
 
     fig, ax = plt.subplots(figsize=(10, 5.5), dpi=300)
@@ -110,7 +114,8 @@ def generate_century_binned_plot(data_path='output/tables/etc_bayesian_latent_tr
         region_data = summary[summary['Regional_Zone'] == code].sort_values('Century')
         if not region_data.empty:
             ax.plot(region_data['Century'], region_data['Latent_Value_Mean'], label=meta['name'],
-                    color=meta['color'], marker=meta['marker'], linewidth=1.75, markersize=5, alpha=0.9)
+                    color=meta['color'], marker=meta['marker'], linestyle=meta['style'],
+                    linewidth=1.75, markersize=5, alpha=0.9)
 
     ax.set_title("Inferred Trajectory of Romantic Themes Across Historical Eras", fontsize=12, fontweight='bold', pad=14)
     ax.set_xlabel("Historical Era", fontsize=10)
@@ -129,10 +134,11 @@ def generate_century_binned_plot(data_path='output/tables/etc_bayesian_latent_tr
 
 def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.csv', output_dir='output/figures'):
     """
-    Draws a side-by-side comparison of the original step-binned study against our model.
+    draws a side-by-side comparison of the original step-binned study against our model.
+    utilizes structural hatch overlays and distinct line styles to support grayscale printing.
     """
     if not os.path.exists(report_path):
-        print(f"[WARNING] Missing comparison report file at: {report_path}")
+        print(f"Missing comparison report file at: {report_path}")
         return
 
     df = pd.read_csv(report_path)
@@ -152,28 +158,28 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     step_orig = np.append(orig_means, orig_means[-1])
     step_bayes = np.append(bayes_means, bayes_means[-1])
 
-    # original paper data
-    ax1.step(boundaries, step_orig, where='post', color='#b21f2d', lw=2.5, label="Original Fixed Effects (Baumard et al. 2022)")
+    # original paper data: solid high-contrast black profile with high density stripe hatch
+    ax1.step(boundaries, step_orig, where='post', color='#000000', lw=2.5, label="Original Fixed Effects (Baumard et al. 2022)")
     for i in range(4):
         ax1.fill_between(
             [boundaries[i], boundaries[i+1]],
             orig_means[i] - 1.96 * orig_ses[i],
             orig_means[i] + 1.96 * orig_ses[i],
-            color='#b21f2d', alpha=0.1
+            color='#000000', alpha=0.08, hatch='//'
         )
     ax1.set_title("Original Study Design: Discrete Chronological Bins", fontweight='bold', pad=10)
     ax1.set_ylabel("Romanticism (Log-Odds)")
     ax1.set_ylim(-1.5, 2.0)
     ax1.legend(loc="upper left")
 
-    # replicated data (Bayesian model)
-    ax2.step(boundaries, step_bayes, where='post', color='#1f77b4', lw=2.5, label="Aggregated SST-GP-GLMM Latent Trajectory Mean")
+    # replicated data: long-dashed okabe-ito blue profile with soft dot hatch
+    ax2.step(boundaries, step_bayes, where='post', color='#0072B2', lw=2.5, linestyle='--', label="Aggregated SST-GP-GLMM Latent Trajectory Mean")
     for i in range(4):
         ax2.fill_between(
             [boundaries[i], boundaries[i+1]],
             bayes_means[i] - bayes_sds[i],
             bayes_means[i] + bayes_sds[i],
-            color='#1f77b4', alpha=0.12
+            color='#0072B2', alpha=0.10, hatch='..'
         )
     ax2.set_title("Replication Framework: Aggregated Spatiotemporal Manifold", fontweight='bold', pad=10)
     ax2.set_xlabel("Historical Chronological Horizon (Years CE)", labelpad=10)
@@ -181,7 +187,7 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     ax2.set_ylim(-1.5, 2.0)
     ax2.legend(loc="upper left")
 
-    # Formatting cleanups
+    # formatting cleanups
     ax2.set_xlim(-600, 1900)
     ax2.set_xticks(boundaries)
     ax2.set_xticklabels(['-500', '200 AD', '800 AD', '1400 AD', '1800 AD'])
@@ -196,6 +202,7 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     save_path = os.path.join(output_dir, "model_comparison_chart.png")
     plt.savefig(save_path, bbox_inches='tight', dpi=300)
     plt.close()
+    print(f"Exported trajectory paradigm comparisons to: {save_path}")
 
 if __name__ == "__main__":
     plot_publication_trajectories()
