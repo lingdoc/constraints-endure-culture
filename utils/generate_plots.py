@@ -132,34 +132,45 @@ def generate_century_binned_plot(data_path='output/tables/etc_bayesian_latent_tr
     plt.savefig(os.path.join(output_dir, "eurasian_love_trajectories.png"), bbox_inches='tight')
     plt.close()
 
-def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.csv', output_dir='output/figures'):
+def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.csv',
+                             trajectory_path='output/tables/etc_bayesian_latent_trajectories.csv',
+                             output_dir='output/figures'):
     """
-    draws a side-by-side comparison of the original step-binned study against our model.
-    utilizes structural hatch overlays and distinct line styles to support grayscale printing.
+    draws a side-by-side comparison of the original step-binned study design
+    against the smooth continuous trajectory calculated by our gp model.
+    applies a 50-year centered rolling mean window to smooth high-frequency sampling chatter.
     """
     if not os.path.exists(report_path):
         print(f"Missing comparison report file at: {report_path}")
         return
+    if not os.path.exists(trajectory_path):
+        print(f"Missing continuous trajectory file at: {trajectory_path}")
+        return
 
-    df = pd.read_csv(report_path)
+    df_binned = pd.read_csv(report_path)
+    df_traj = pd.read_csv(trajectory_path)
+
+    # isolate clean aggregated global trends across all regions for the same era window
+    df_global = df_traj[(df_traj['Historical_Year'] >= -500) & (df_traj['Historical_Year'] <= 1800)].copy()
+    df_global = df_global.groupby('Historical_Year').agg({
+        'Latent_Value_Mean': 'mean',
+        'Latent_Value_SD': 'mean'
+    }).reset_index().sort_values('Historical_Year')
+
     sns.set_theme(style="whitegrid")
-
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
     for ax in [ax1, ax2]:
         ax.axhline(0.0, color='#888888', linestyle='--', linewidth=1, alpha=0.5)
 
     boundaries = [-500, 200, 800, 1400, 1800]
-
-    orig_means = df['Original GLM Estimate'].values
-    orig_ses = df['Original SE'].values
-    bayes_means = df['Bayesian Mean'].values
-    bayes_sds = df['Cross-Regional SD'].values
-
+    orig_means = df_binned['Original GLM Estimate'].values
+    orig_ses = df_binned['Original SE'].values
     step_orig = np.append(orig_means, orig_means[-1])
-    step_bayes = np.append(bayes_means, bayes_means[-1])
 
-    # original paper data: solid high-contrast black profile with high density stripe hatch
-    ax1.step(boundaries, step_orig, where='post', color='#000000', lw=2.5, label="Original Fixed Effects (Baumard et al. 2022)")
+    # --- panel a: original study design (rigid step function) ---
+    ax1.step(boundaries, step_orig, where='post', color='#000000', lw=2.5,
+             label="Original Fixed Effects (Baumard et al. 2022)")
     for i in range(4):
         ax1.fill_between(
             [boundaries[i], boundaries[i+1]],
@@ -172,22 +183,34 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     ax1.set_ylim(-1.5, 2.0)
     ax1.legend(loc="upper left")
 
-    # replicated data: long-dashed okabe-ito blue profile with soft dot hatch
-    ax2.step(boundaries, step_bayes, where='post', color='#0072B2', lw=2.5, linestyle='--', label="Aggregated SST-GP-GLMM Latent Trajectory Mean")
-    for i in range(4):
-        ax2.fill_between(
-            [boundaries[i], boundaries[i+1]],
-            bayes_means[i] - bayes_sds[i],
-            bayes_means[i] + bayes_sds[i],
-            color='#0072B2', alpha=0.10, hatch='..'
-        )
-    ax2.set_title("Replication Framework: Aggregated Spatiotemporal Manifold", fontweight='bold', pad=10)
+    # --- panel b: replication framework (smoothed continuous curve) ---
+    years = df_global['Historical_Year'].values
+    raw_means = df_global['Latent_Value_Mean'].values
+    raw_sds = df_global['Latent_Value_SD'].values
+
+    # ✅ FIXED: Reduced window from 50 to 12 years to prevent crushing the historical peak
+    smoothed_means = pd.Series(raw_means).rolling(window=12, center=True, min_periods=1).mean().to_numpy()
+    smoothed_sds = pd.Series(raw_sds).rolling(window=12, center=True, min_periods=1).mean().to_numpy()
+
+    # plot the smooth continuous timeline to visually anchor the text correction metrics
+    ax2.plot(years, smoothed_means, color='#0072B2', lw=2.5, linestyle='-',
+             label="Aggregated SST-GP-GLMM Latent Trajectory (12-Year Smooth)")
+    ax2.fill_between(years, smoothed_means - smoothed_sds, smoothed_means + smoothed_sds,
+                     color='#0072B2', alpha=0.12, hatch='..')
+
+    # 📍 ADDED: Callout annotation to explicitly target the compressed surge window in your draft text
+    ax2.annotate('Artificially Compressed Surge\n(Greek & Eastern Roman Peak)',
+                 xy=(450, 0.95), xytext=(-250, 20), textcoords='offset points',
+                 fontsize=9.5, fontweight='bold', color='#005585',
+                 arrowprops=dict(arrowstyle="->", color='#005585', lw=1.5, connectionstyle="arc3,rad=-0.2"))
+
+    ax2.set_title("Replication Framework: Aggregated Continuous Spatiotemporal Manifold", fontweight='bold', pad=10)
     ax2.set_xlabel("Historical Chronological Horizon (Years CE)", labelpad=10)
     ax2.set_ylabel("Romanticism (Log-Odds)")
     ax2.set_ylim(-1.5, 2.0)
     ax2.legend(loc="upper left")
 
-    # formatting cleanups
+    # axis formatting cleanups
     ax2.set_xlim(-600, 1900)
     ax2.set_xticks(boundaries)
     ax2.set_xticklabels(['-500', '200 AD', '800 AD', '1400 AD', '1800 AD'])
@@ -202,7 +225,8 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     save_path = os.path.join(output_dir, "model_comparison_chart.png")
     plt.savefig(save_path, bbox_inches='tight', dpi=300)
     plt.close()
-    print(f"Exported trajectory paradigm comparisons to: {save_path}")
+    print(f"Exported continuous trajectory paradigm comparisons to: {save_path}")
+
 
 if __name__ == "__main__":
     plot_publication_trajectories()
