@@ -1,6 +1,6 @@
 """
-Averages continuous model trajectories into matching era blocks to compute trend correlations.
-Exports an automated Markdown comparison table for project documentation.
+utils/compare_models.py - Averages continuous model trajectories into matching era blocks to compute trend correlations.
+Exports a markdown comparison table for project documentation.
 """
 import os
 import numpy as np
@@ -46,7 +46,7 @@ def execute_model_comparison(bayes_path='output/tables/etc_bayesian_latent_traje
     df_comp = pd.DataFrame(comparison_records)
     correlation = np.corrcoef(df_comp["Original GLM Estimate"], df_comp["Bayesian Mean"])[0, 1]
 
-    # export markdown syntax summary report file
+    # export markdown summary report file
     md_path = os.path.join(output_dir, "model_confirmation_table.md")
     os.makedirs(output_dir, exist_ok=True)
 

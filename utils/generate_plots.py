@@ -1,5 +1,5 @@
 """
-generates the project's primary manuscript figures and model trend charts.
+utils/generate_plots.py - Generates the project's primary manuscript figures and model trend charts.
 """
 import os
 import numpy as np
@@ -17,8 +17,8 @@ def _load_and_clean_data(data_path):
 
 def plot_publication_trajectories(data_path='output/tables/etc_bayesian_latent_trajectories.csv', output_dir='output/figures'):
     """
-    plots continuous latent trajectories by region with shaded uncertainty intervals.
-    applies a broad, high-contrast palette with transparent shading to support overlapping lines.
+    Plots continuous latent trajectories by region with shaded uncertainty intervals.
+    Applies a broad, high-contrast palette with transparent shading to support overlapping lines.
     """
     sns.set_theme(style="white")
     plt.rcParams.update({
@@ -89,8 +89,8 @@ def plot_publication_trajectories(data_path='output/tables/etc_bayesian_latent_t
 
 def generate_century_binned_plot(data_path='output/tables/etc_bayesian_latent_trajectories.csv', output_dir='output/figures'):
     """
-    groups historical years into discrete centuries to reduce baseline timeline clutter.
-    pairs unique markers and line styles to secure legibility in greyscale printouts.
+    Groups historical years into discrete centuries to reduce baseline timeline clutter.
+    Pairs unique markers and line styles to secure legibility in greyscale printouts.
     """
     df = _load_and_clean_data(data_path)
     df['Century'] = (np.floor(df['Historical_Year'] / 100) * 100).astype(int)
@@ -136,9 +136,9 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
                              trajectory_path='output/tables/etc_bayesian_latent_trajectories.csv',
                              output_dir='output/figures'):
     """
-    draws a side-by-side comparison of the original step-binned study design
+    Draws a side-by-side comparison of the original step-binned study design
     against the smooth continuous trajectory calculated by our gp model.
-    applies a 50-year centered rolling mean window to smooth high-frequency sampling chatter.
+    Applies a 50-year centered rolling mean window to smooth high-frequency sampling chatter.
     """
     if not os.path.exists(report_path):
         print(f"Missing comparison report file at: {report_path}")
@@ -168,7 +168,7 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     orig_ses = df_binned['Original SE'].values
     step_orig = np.append(orig_means, orig_means[-1])
 
-    # --- panel a: original study design (rigid step function) ---
+    # panel A: original study design (rigid step function)
     ax1.step(boundaries, step_orig, where='post', color='#000000', lw=2.5,
              label="Original Fixed Effects (Baumard et al. 2022)")
     for i in range(4):
@@ -183,12 +183,12 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     ax1.set_ylim(-1.5, 2.0)
     ax1.legend(loc="upper left")
 
-    # --- panel b: replication framework (smoothed continuous curve) ---
+    # panel B: replication framework (smoothed continuous curve)
     years = df_global['Historical_Year'].values
     raw_means = df_global['Latent_Value_Mean'].values
     raw_sds = df_global['Latent_Value_SD'].values
 
-    # ✅ FIXED: Reduced window from 50 to 12 years to prevent crushing the historical peak
+    # window set to 12 years to prevent crushing the historical peak
     smoothed_means = pd.Series(raw_means).rolling(window=12, center=True, min_periods=1).mean().to_numpy()
     smoothed_sds = pd.Series(raw_sds).rolling(window=12, center=True, min_periods=1).mean().to_numpy()
 
@@ -198,7 +198,7 @@ def plot_paradigm_comparison(report_path='output/tables/era_binned_comparison.cs
     ax2.fill_between(years, smoothed_means - smoothed_sds, smoothed_means + smoothed_sds,
                      color='#0072B2', alpha=0.12, hatch='..')
 
-    # 📍 ADDED: Callout annotation to explicitly target the compressed surge window in your draft text
+    # annotation to explicitly target the compressed surge window in your draft text
     ax2.annotate('Artificially Compressed Surge\n(Greek & Eastern Roman Peak)',
                  xy=(450, 0.95), xytext=(-250, 20), textcoords='offset points',
                  fontsize=9.5, fontweight='bold', color='#005585',

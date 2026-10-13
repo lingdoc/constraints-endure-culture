@@ -1,9 +1,7 @@
 """
-calculate_connectivity.py
-
-this script checks data clustering across the culture dataset layers.
-it uses the installed 'pykdensity' library to evaluate spatial overlap
-and thematic linkages within the centralized excel datasheet.
+calculate_connectivity.py - This script checks data clustering across the culture dataset layers.
+It uses the installed 'pykdensity' library to evaluate spatial overlap
+and thematic linkages within the excel datasheet.
 """
 
 import os
@@ -11,16 +9,16 @@ import pandas as pd
 import numpy as np
 from pykdensity import calculate_densities
 
-# 0. project setup
+# project setup
 data_dir = "data"
 output_csv = os.path.join("output", "tables", "culture_connectivity_summary.csv")
 os.makedirs(os.path.dirname(output_csv), exist_ok=True)
 
 print("\nStarting data connectivity analysis")
-
+# original study data, converted to xlsx to preserve formatting
 data_path = os.path.join(data_dir, "Data_love_bywork_2019.xlsx")
 
-# 1. verify dataset availability
+# verify dataset
 if not os.path.exists(data_path):
     print(f"Error: Culture data sheet missing at {data_path}")
     exit(1)
@@ -30,14 +28,14 @@ df_culture = pd.read_excel(data_path)
 sample_size = len(df_culture)
 print(f"Successfully loaded {sample_size} cultural trajectory records.")
 
-# isolate identifier column name dynamically
+# identifier column
 id_column = 'Name' if 'Name' in df_culture.columns else df_culture.columns[0]
 
-# isolate valid thematic attributes present in dataset columns
+# thematic attributes present in dataset columns
 struct_list = [col for col in ['Century', 'Genre.1'] if col in df_culture.columns]
 
-# 2. run the matrix check using matching categories
-# mapped parameters exactly to your engine's 'spatial_cats' and 'struct_cats' setup
+# run the matrix check
+# map parameters to 'spatial_cats' and 'struct_cats'
 k_spatial, k_structural = calculate_densities(
     data=df_culture,
     id_col=id_column,
@@ -51,7 +49,7 @@ k_spatial, k_structural = calculate_densities(
     verbose=True
 )
 
-# tag safety topology boundaries using the updated 0.10 rule
+# tag safety topology boundaries
 if not pd.isna(k_structural) and k_structural <= 0.10:
     tier_status = "sparse_topology"
 elif not pd.isna(k_structural) and k_structural <= 0.25:
@@ -59,7 +57,7 @@ elif not pd.isna(k_structural) and k_structural <= 0.25:
 else:
     tier_status = "dense_topology"
 
-# 3. compile results into a summary table
+# compile results into a summary table
 compiled_results = [{
     "Dataset": "Data_love_bywork_2019",
     "Sample_Size_N": sample_size,
