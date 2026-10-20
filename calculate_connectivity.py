@@ -15,10 +15,8 @@ output_csv = os.path.join("output", "tables", "culture_connectivity_summary.csv"
 os.makedirs(os.path.dirname(output_csv), exist_ok=True)
 
 print("\nStarting data connectivity analysis")
-# Original study data, converted to xlsx to preserve formatting
 data_path = os.path.join(data_dir, "Data_love_bywork_2019.xlsx")
 
-# Verify dataset path exists
 if not os.path.exists(data_path):
     print(f"Error: Culture data sheet missing at {data_path}")
     exit(1)
@@ -36,22 +34,16 @@ id_column = 'Name' if 'Name' in df_culture.columns else df_culture.columns[0]
 struct_list = [col for col in ['Century', 'Genre.1'] if col in df_culture.columns]
 
 try:
-    # Run the matrix check using the updated package specifications
+    # The package will automatically select the Fixed Absolute Depth optimization track
     spatial_metrics, struct_metrics, tsi_current = calculate_densities(
         data=df_culture,
         id_col=id_column,
-        tree=None,                  # Disabled: culture dataset relies entirely on text categories
-        tree_type='adaptive',
-        coord_cols=None,            # Geographic region tags used instead of spatial coordinates
         spatial_cats='Zone' if 'Zone' in df_culture.columns else None,
         struct_cats=struct_list if struct_list else None,
-        spatial_km=500.0,
-        struct_depth="ratio_0.85",  # Fixed baseline threshold ratio
-        domain="culture",           # Explicitly set domain for language/cultural architectures
+        struct_depth='auto',  # Engages internal Route 1 optimization
         verbose=False
     )
 
-    # Extract calculated densities from the returned metrics dictionaries
     k_spatial = float(spatial_metrics["kappa"]) if not pd.isna(spatial_metrics["kappa"]) else np.nan
     k_structural = float(struct_metrics["kappa"]) if not pd.isna(struct_metrics["kappa"]) else np.nan
 
@@ -69,7 +61,6 @@ elif not pd.isna(tsi_current) and tsi_current <= 0.0500:
 else:
     tier_status = "stable pooling backbone"
 
-# Compile results into a summary table format
 compiled_results = [{
     "Dataset": "Data_love_bywork_2019",
     "Sample_Size_N": sample_size,
