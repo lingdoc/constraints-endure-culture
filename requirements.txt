@@ -6,4 +6,4 @@ seaborn==0.13.2
 openpyxl>=3.1.0
 numpyro>=0.15.0
 jax[cuda]>=0.4.30
-git+https://github.com/lingdoc/pykdensity
+git+https://github.com/lingdoc/pytstability

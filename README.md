@@ -75,13 +75,13 @@ The main script `run_model.py` automatically cleans the spreadsheet data before 
 The core Bayesian model uses JAX-accelerated sampling. While they can run on a standard CPU, an NVIDIA GPU is highly recommended for faster sampling times.
 
 ### Dependencies
-Install the required packages using the pinned project requirements file. This process downloads the [`pykdensity` package](https://github.com/lingdoc/pykdensity) to handle the auditing of data connectivity:
+Install the required packages using the pinned project requirements file. This process downloads the [`pytstability` package](https://github.com/lingdoc/pytstability) to handle the auditing of data connectivity:
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 1. Audit dataset connectivity (Recommended)
-Run the diagnostic script to measure background spatial and thematic data clustering before fitting any models. This script targets your categorical spreadsheets, calculates density scores via the `pykdensity` package, and logs the spatial and structural evaluation metrics (κ) to the terminal:
+Run the diagnostic script to measure background spatial and thematic data clustering before fitting any models. This script targets your categorical spreadsheets, calculates density scores via the `pytstability` package, and logs the spatial and structural evaluation metrics (κ) to the terminal:
 ```bash
 python calculate_connectivity.py
 ```
