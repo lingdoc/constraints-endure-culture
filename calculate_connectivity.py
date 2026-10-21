@@ -35,7 +35,7 @@ struct_list = [col for col in ['Century', 'Genre.1'] if col in df_culture.column
 
 try:
     # The package will automatically select the Fixed Absolute Depth optimization track
-    spatial_metrics, struct_metrics, tsi_current = calculate_densities(
+    spatial_metrics, struct_metrics, tsi_current, gamma_current = calculate_densities(
         data=df_culture,
         id_col=id_column,
         spatial_cats='Zone' if 'Zone' in df_culture.columns else None,
@@ -52,6 +52,7 @@ except Exception as e:
     k_spatial = np.nan
     k_structural = np.nan
     tsi_current = np.nan
+    gamma_current = np.nan
 
 # Categorize the network stability using the threshold boundary guidelines
 if not pd.isna(tsi_current) and tsi_current <= 0.0018:
@@ -67,6 +68,7 @@ compiled_results = [{
     "Spatial_Density": k_spatial if not pd.isna(k_spatial) else np.nan,
     "Structural_Density": k_structural if not pd.isna(k_structural) else np.nan,
     "Topology_Stability_Index": tsi_current if not pd.isna(tsi_current) else np.nan,
+    "Critical_Horizon": gamma_current if not pd.isna(gamma_current) else np.nan,
     "Operational_Status": tier_status
 }]
 
