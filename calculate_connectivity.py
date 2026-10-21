@@ -35,7 +35,7 @@ struct_list = [col for col in ['Century', 'Genre.1'] if col in df_culture.column
 
 try:
     # The package will automatically select the Fixed Absolute Depth optimization track
-    spatial_metrics, struct_metrics, tsi_current, gamma_current = calculate_densities(
+    t_metrics = calculate_densities(
         data=df_culture,
         id_col=id_column,
         spatial_cats='Zone' if 'Zone' in df_culture.columns else None,
@@ -44,8 +44,10 @@ try:
         verbose=False
     )
 
-    k_spatial = float(spatial_metrics["kappa"]) if not pd.isna(spatial_metrics["kappa"]) else np.nan
-    k_structural = float(struct_metrics["kappa"]) if not pd.isna(struct_metrics["kappa"]) else np.nan
+    k_spatial = float(t_metrics["spatial_metrics"].get("kappa", np.nan))
+    k_structural = float(t_metrics["structural_metrics"].get("kappa", np.nan))
+    tsi_current = float(t_metrics.get("topology_stability_index", np.nan))
+    gamma_current = float(t_metrics.get("critical_horizon", np.nan))
 
 except Exception as e:
     print(f"Warning: Density calculation failed: {e}")
