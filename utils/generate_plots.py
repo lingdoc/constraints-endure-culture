@@ -50,7 +50,7 @@ def plot_publication_trajectories(data_path='output/tables/etc_bayesian_latent_t
         'Ancient Egypt': {'code': 'EGY', 'color': '#bbbbbb'}
     }
 
-    fig, ax = plt.subplots(figsize=(10.5, 7.5), dpi=300)
+    fig, ax = plt.subplots(figsize=(10, 8), dpi=300)
     ax.axhline(0.0, color='#e5e7eb', linestyle='-', lw=1.0, zorder=1)
 
     for name, attrs in paper_styles.items():
@@ -106,7 +106,7 @@ def generate_century_binned_plot(data_path='output/tables/etc_bayesian_latent_tr
         'ARA': {'name': 'Arabic World', 'color': '#000000', 'marker': 'x', 'style': '--'}  # black dashed
     }
 
-    fig, ax = plt.subplots(figsize=(10, 5.5), dpi=300)
+    fig, ax = plt.subplots(figsize=(10, 8), dpi=300)
     ax.axvline(x=0, color='#888888', linestyle='--', linewidth=1, alpha=0.7)
     ax.grid(True, linestyle=':', alpha=0.4, color='#cccccc')
 
